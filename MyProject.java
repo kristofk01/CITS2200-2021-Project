@@ -1,4 +1,4 @@
-// Full Name (StudentNum)
+// Alexandria Bennett(22969368)
 
 public class MyProject implements Project {
     public boolean allDevicesConnected(int[][] adjlist) {
