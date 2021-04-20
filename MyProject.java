@@ -1,4 +1,5 @@
 // Alexandria Bennett(22969368)
+import java.util.Array;
 
 public class MyProject implements Project {
     public boolean allDevicesConnected(int[][] adjlist) {
