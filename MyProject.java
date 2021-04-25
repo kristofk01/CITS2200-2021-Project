@@ -3,8 +3,18 @@ import java.util.Array;
 
 public class MyProject implements Project {
     public boolean allDevicesConnected(int[][] adjlist) {
-        // TODO
-        return false;
+        //will need a visited array
+        //go through adjList[0] and mark each node as visited
+        //make bfs -> look at SearchImp
+        if (!visited){
+        for (int i = 0; i < size; i++){
+         for (int j = 0; j < size.2; j++){
+          adjList[i][j] = visited;   
+         }
+        }
+       } 
+        if(allVisited = true)
+        return true;
     }
 
     public int numPaths(int[][] adjlist, int src, int dst) {
