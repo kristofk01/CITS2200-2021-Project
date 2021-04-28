@@ -6,6 +6,7 @@ public class MyProject implements Project {
         //will need a visited array
         //go through adjList[0] and mark each node as visited
         //make bfs -> look at SearchImp
+        //or prims algorithm to make min spanning tree?
         if (!visited){
         for (int i = 0; i < size; i++){
          for (int j = 0; j < size.2; j++){
