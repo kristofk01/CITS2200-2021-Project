@@ -4,20 +4,22 @@ import java.util.Array;
 
 public class MyProject implements Project {
   public boolean allDevicesConnected(int[][] adjlist) {
-    //will need a visited array
-    //go through adjList[0] and mark each node as visited
-    //make bfs -> look at SearchImp
-    //or prims algorithm to make min spanning tree?
-    if (!visited) {
-      for (int i = 0; i < size; i++) {
-        getArray[i];
-        size2 = secondArray.length
+    int size = adjList.length;
+    boolean[] connected = new boolean[size];
+    connected[0] = true;
+   
+    for (int i = 0; i < size; i++) {
+      if(!connected[i]) {
+        int size2 = adjjList[i].length;
         for (int j = 0; j < size2; j++) {
-          adjList[i][j] = visited;
+          adjList[i][j] = connected;   
         }
       }
     }
-    if(allVisited = true)
+
+    for(int x : connected) {
+      if(!x) {return false;}
+    }
     return true;
   }
 
