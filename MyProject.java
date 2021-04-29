@@ -1,8 +1,8 @@
-// Alexandria Bennett(22969368), Kristof Kovacs (22869854)
-
+// Alexandria Bennett(22969368)
 import java.util.Array;
 
 public class MyProject implements Project {
+<<<<<<< HEAD
   public boolean allDevicesConnected(int[][] adjlist) {
     //will need a visited array
     //go through adjList[0] and mark each node as visited
