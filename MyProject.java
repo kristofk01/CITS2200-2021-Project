@@ -4,6 +4,7 @@ import java.util.Array;
 
 public class MyProject implements Project {
   public boolean allDevicesConnected(int[][] adjlist) {
+    // Test comment
     int size = adjList.length;
     boolean[] connected = new boolean[size];
     connected[0] = true;
