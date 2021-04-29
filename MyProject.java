@@ -9,7 +9,9 @@ public class MyProject implements Project {
         //or prims algorithm to make min spanning tree?
         if (!visited){
         for (int i = 0; i < size; i++){
-         for (int j = 0; j < size.2; j++){
+            getArray[i];
+            size2 = secondArray.size
+         for (int j = 0; j < size2; j++){
           adjList[i][j] = visited;   
          }
         }
