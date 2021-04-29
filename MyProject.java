@@ -2,7 +2,6 @@
 import java.util.Array;
 
 public class MyProject implements Project {
-<<<<<<< HEAD
   public boolean allDevicesConnected(int[][] adjlist) {
     //will need a visited array
     //go through adjList[0] and mark each node as visited
