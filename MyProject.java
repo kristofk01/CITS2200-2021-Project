@@ -1,4 +1,5 @@
-// Alexandria Bennett(22969368)
+// Alexandria Bennett(22969368), Kristof Kovacs (22869854)
+
 import java.util.Array;
 
 public class MyProject implements Project {
