@@ -1,26 +1,20 @@
 // Alexandria Bennett(22969368), Kristof Kovacs (22869854)
 
-import java.util.Array;
-
 public class MyProject implements Project {
   public boolean allDevicesConnected(int[][] adjlist) {
     // Note: should we use Bellman-Ford here instead of BFS?
     // i agree akhrefslhrggglaueurglas
-    int size = adjList.length;
+    int size = adjlist.length;
     boolean[] connected = new boolean[size];
-    connected[0] = true;
-    int[] distances = new int[size];
-    
+    connected[0] = true;    
    
     for (int i = 0; i < size; i++) {
-        int size2 = adjList[i].length;
-        for (int j = 0; j < size2; j++) {
-          connected[j] = true;
-        }
+      for (int j = 0; j < adjlist[i].length; j++) {
+        connected[adjlist[i][j]] = true;
       }
     }
 
-    for(int x : connected) {
+    for(boolean x : connected) {
       if(!x) {return false;}
     }
     return true;
