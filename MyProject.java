@@ -15,7 +15,7 @@ public class MyProject implements Project {
     for (int i = 0; i < size; i++) {
         int size2 = adjList[i].length;
         for (int j = 0; j < size2; j++) {
-          adjList[i][j] = connected;
+          connected[j] = true;
         }
       }
     }
