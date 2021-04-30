@@ -25,7 +25,8 @@ public class MyProject implements Project {
   }
 
   public int numPaths(int[][] adjlist, int src, int dst) {
-    // TODO
+    int count = 0;
+    
     return 0;
   }
 
