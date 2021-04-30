@@ -2,11 +2,10 @@
 
 public class MyProject implements Project {
   public boolean allDevicesConnected(int[][] adjlist) {
-    // Note: should we use Bellman-Ford here instead of BFS?
-    // i agree akhrefslhrggglaueurglas
+    // Note: This is O(n^2), our goal is O(n)
     int size = adjlist.length;
     boolean[] connected = new boolean[size];
-    connected[0] = true;    
+    connected[0] = true;
    
     for (int i = 0; i < size; i++) {
       for (int j = 0; j < adjlist[i].length; j++) {
