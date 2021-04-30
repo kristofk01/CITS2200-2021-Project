@@ -9,6 +9,7 @@ public class MyProject implements Project {
     int size = adjList.length;
     boolean[] connected = new boolean[size];
     connected[0] = true;
+    int[] distances = new int[size];
    
     for (int i = 0; i < size; i++) {
       if(!connected[i]) {
