@@ -2,15 +2,26 @@
 
 public class MyProject implements Project {
   public boolean allDevicesConnected(int[][] adjlist) {
-    // Note: should we use Bellman-Ford here instead of BFS?
-    // i agree akhrefslhrggglaueurglas
+    
     int size = adjlist.length;
     boolean[] connected = new boolean[size];
+
     connected[0] = true;    
    
     for (int i = 0; i < size; i++) {
       for (int j = 0; j < adjlist[i].length; j++) {
         connected[adjlist[i][j]] = true;
+        
+    connected[0] = true;
+    
+   
+    for (int i = 0; i < size; i++) {
+        int size2 = adjList[i].length;
+        for (int j = 0; j < size2; j++) {
+          int check = adjList[i][j];
+          connected[check] = true;
+        }
+
       }
     }
 
