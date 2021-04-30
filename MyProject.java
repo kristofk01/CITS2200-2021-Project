@@ -4,16 +4,16 @@ import java.util.Array;
 
 public class MyProject implements Project {
   public boolean allDevicesConnected(int[][] adjlist) {
-    // Test comment
+    // Note: should we use Bellman-Ford here instead of BFS?
     int size = adjList.length;
     boolean[] connected = new boolean[size];
     connected[0] = true;
    
     for (int i = 0; i < size; i++) {
       if(!connected[i]) {
-        int size2 = adjjList[i].length;
+        int size2 = adjList[i].length;
         for (int j = 0; j < size2; j++) {
-          adjList[i][j] = connected;   
+          adjList[i][j] = connected;
         }
       }
     }
