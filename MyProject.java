@@ -53,7 +53,7 @@ public class MyProject implements Project {
         count++;
 
       for (int vertex : adjlist[current]) {
-        if (visited[vertex]) continue{
+        if (visited[vertex]) {
           queue.add(vertex);
           visited[vertex] = true;
         }
@@ -74,7 +74,64 @@ public class MyProject implements Project {
      *i think the queries arrays will not be the same length as addrs so that will need to be checked. 
      *returning the number of hops to get to a subnet (from queries)
      */
-    return null;
+
+    
+    // This stack should contain all devices in the specified subnet
+    //Stack<Integer> stack = new Stack<>();
+    
+    int deviceCount = adjlist.length;
+
+    ///////////////////
+    // Might not need a stack, we just set the devices that aren't in the
+    // subnet to visited=true so that Dijkstra ignores them from the start.
+    boolean[] visited = new boolean[deviceCount];
+    ///////////////////
+    
+    // NOTE: probably broken asf
+    for (int i = 0; i < deviceCount; i++) {
+      //int device = adjlist[i][0];
+      short[] device_address = addrs[i];
+
+      // The device is in the subnet
+      boolean isInSubnet = true;
+      for (int j = 0; j < queries[i].length; j++) {
+        short[] subnet = queries[i];
+        // Not in subnet
+        if (subnet[j] < device_address[j]) {
+          isInSubnet = false;
+          break;
+        }
+      }
+      if (!isInSubnet) {
+        visited[i] = true;
+      } // else { stack.push(device); }
+    }
+
+    // Run Dijkstra's on the devices in the subnet
+    PriorityQueue<Node> queue = new PriorityQueue<>();
+    int[] key = new int[deviceCount];
+    Arrays.fill(key, -1);
+
+    key[src] = 0;
+    queue.add(new Node(src, key[src]));
+
+    while (!queue.isEmpty()) {
+      Node current = queue.remove();
+      if (!visited[current.vertex]) {
+        visited[current.vertex] = true;
+        key[current.vertex] = current.priority;
+
+        // deviceCount is wrong, java.lang.ArrayIndexOutOfBoundsException for i
+        for (int i = 0; i < deviceCount; i++) {
+          if (!visited[i] && adjlist[current.vertex][i] >= 1) {
+            queue.remove();
+            queue.add(new Node(i, adjlist[current.vertex][i] + current.priority));
+          }
+        }
+      }
+    }
+
+    return key;
   }
 
   public int maxDownloadSpeed(int[][] adjlist, int[][] speeds, int src, int dst) {
@@ -86,5 +143,22 @@ public class MyProject implements Project {
      *dijkstra again (or similar) to grab the max total speed from the source to destination.
      */
     return 0;
+  }
+
+  /**
+   * Inner-class that allows for the priority queue to store
+   * a given vertex with a priority.
+   */
+  private class Node implements Comparable<Node> {
+    int vertex, priority;
+
+    Node (int vertex, int priority) {
+      this.vertex = vertex;
+      this.priority = priority;
+    }
+
+    public int compareTo (Node other) {
+      return Integer.compare(this.priority, other.priority);
+    }
   }
 }
