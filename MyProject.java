@@ -106,6 +106,8 @@ public class MyProject implements Project {
         visited[i] = true;
       } // else { stack.push(device); }
     }
+    
+    //key returns null :/
 
     // Run Dijkstra's on the devices in the subnet
     PriorityQueue<Node> queue = new PriorityQueue<>();
