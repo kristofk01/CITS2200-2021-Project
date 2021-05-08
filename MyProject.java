@@ -136,16 +136,41 @@ public class MyProject implements Project {
     return key;
   }
 
+  
   public int maxDownloadSpeed(int[][] adjlist, int[][] speeds, int src, int dst) {
-   //Bellman Ford or Flyod Warshall depending on the complexity (VE vs V^3)
+   //Bellman Ford or Floyd Warshall depending on the complexity (VE vs V^3)
     /* speeds[i][j] relates to the device at adjList[i][j]
      * instead of smallest path, we need biggest path eg MAX speed
      * can travel multiple paths at once and can be asymetric down a link -> check both ways?
      *if (src == dst){return -1}
      *dijkstra again (or similar) to grab the max total speed from the source to destination.
      */
-    return 0;
+
+
+    // completely different, just writing down psuedo code for floyd warshall
+     // NEED TO MAKE A SECOND MATRIX CALLED prevSpeed SO WE CAN DO THIS
+     int[][] prevSpeed = new int[speeds.length][speeds.length];
+
+     for(k = 1; k < length; k++){
+
+     for(int i = 0; i < length; i++){
+      for(int j = 0; j < length; j++){
+        maxSpeed = max/*?*/(prev max, prevspeed through k vals added.)
+      }
+     }
+    }
+
+
+     if(/*i maybe? */ == dst){return maxSpeed;}
   }
+
+
+    //maximuum value method. dont know if needed.
+    private int maxVal(int a, int b){
+      if(a > b) {return a}
+      if(b > a){return b}
+    }
+
 
   /**
    * Inner-class that allows for the priority queue to store
