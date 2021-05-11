@@ -25,6 +25,17 @@ public class MyProject implements Project {
         }
       }
     }
+    
+    queue.add(adjList.length -1); //from last node in other direction (incase 2 cycles?)
+    while (!queue.isEmpty()) {
+      int current = queue.remove();
+      for (int vertex : adjlist[current]) {
+        if (visited[vertex]) continue {
+          queue.add(vertex);
+          visited[vertex] = true;
+        }
+      }
+    }
 
     for (boolean v : visited)
       if (!v) return false;
@@ -146,30 +157,38 @@ public class MyProject implements Project {
      *dijkstra again (or similar) to grab the max total speed from the source to destination.
      */
 
+      // Edmonds–Karp algorithm is best complexity
+      //https://en.wikipedia.org/wiki/Edmonds%E2%80%93Karp_algorithm
 
-    // completely different, just writing down psuedo code for floyd warshall
-     // NEED TO MAKE A SECOND MATRIX CALLED prevSpeed SO WE CAN DO THIS
-     int[][] prevSpeed = new int[speeds.length][speeds.length];
-
-     for(k = 1; k < length; k++){
-
-     for(int i = 0; i < length; i++){
-      for(int j = 0; j < length; j++){
-        maxSpeed = max/*?*/(prev max, prevspeed through k vals added.)
+    // make speeds array and just return distance at dst?
+    int maxSpeed = 0;
+    int prevSrc = src;
+    while(prevSrc != dst){
+    for(int i = 0; i < speeds[prevSrc].length; i++){
+      int speed1 = speeds[prevSrc][i];
+      //which speed in each list is fastest/
+      if(speed1 > maxSpeed){
+        
+      }
+      prevSrc = adjlist[prevSrc][i];
       }
      }
-    }
+     if(src == dst){return -1;}
+     return maxSpeed;
 
+     //psuedo codeish
+     q = queue();
+      int[] parent = int[adjList.length];
+     while(!q.isEmpty()){
+      current = q.poll()
+      for(each edge)
+        if(parent[edges] = null and edge != src){
+          parent[edge] = edge;
+          push edge
+        }
+         second half lszkhg;kergvb;zbhv
+     }
 
-     if(/*i maybe? */ == dst){return maxSpeed;}
-  }
-
-
-    //maximuum value method. dont know if needed.
-    private int maxVal(int a, int b){
-      if(a > b) {return a}
-      if(b > a){return b}
-    }
 
 
   /**
