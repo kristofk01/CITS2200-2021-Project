@@ -6,9 +6,13 @@ public class MyProject implements Project {
   /**
    * Checks whether all of the devices in the network are connected using BFS.
    * 
-   * @param adjList the adjacency matrix of the graph being checked.
+   * @param adjlist the adjacency list of the graph being checked.
    */
   public boolean allDevicesConnected(int[][] adjlist) {
+
+    // Linear time implementation
+    // https://courses.cs.vt.edu/~cs4104/murali/Fall09/lectures/lecture-06-linear-time-graph-algorithms.pdf
+
     Queue<Integer> queue = new LinkedList<>();
     boolean[] visited = new boolean[adjlist.length];
 
@@ -26,11 +30,14 @@ public class MyProject implements Project {
       }
     }
     
-    queue.add(adjList.length -1); //from last node in other direction (incase 2 cycles?)
+    //from last node in other direction (incase 2 cycles?)
+    // NOTE(Kris): not 100% sure what u mean, but this causes an infinite loop
+    //queue.add(adjlist.length -1);
+
     while (!queue.isEmpty()) {
       int current = queue.remove();
       for (int vertex : adjlist[current]) {
-        if (visited[vertex]) continue {
+        if (visited[vertex]) {
           queue.add(vertex);
           visited[vertex] = true;
         }
@@ -43,14 +50,20 @@ public class MyProject implements Project {
     return true;
   }
 
-  /* 
-   * NOTE: fails when there are two (or possibly more) paths between the
-   * source and destination nodes.
+  /**
+   * Computes (using BFS) all possible paths between two vertices in the graph.
    * 
-   * This might be helpful for when we want to make it faster:
-   * https://www.cs.princeton.edu/~rs/talks/PathsInGraphs07.pdf
+   * @param adjlist the adjacency list of the graph
+   * @param src the source vertex
+   * @param dst the target vertex
+   * 
+   * @return the number of paths
    */
   public int numPaths(int[][] adjlist, int src, int dst) {
+    // This might be helpful for when we want to make it faster:
+    // https://www.cs.princeton.edu/~rs/talks/PathsInGraphs07.pdf
+    if (src == dst) { return 1; }
+
     Queue<Integer> queue = new LinkedList<>();
     boolean[] visited = new boolean[adjlist.length];
     int count = 0;
@@ -60,11 +73,11 @@ public class MyProject implements Project {
 
     while (!queue.isEmpty()) {
       int current = queue.remove();
-      if (current == dst)
-        count++;
-
       for (int vertex : adjlist[current]) {
-        if (visited[vertex]) {
+        if (vertex == dst) {
+          count++;
+        }
+        else if (!visited[vertex]) {
           queue.add(vertex);
           visited[vertex] = true;
         }
@@ -161,35 +174,37 @@ public class MyProject implements Project {
       //https://en.wikipedia.org/wiki/Edmonds%E2%80%93Karp_algorithm
 
     // make speeds array and just return distance at dst?
+    return 0;
+    /*
     int maxSpeed = 0;
     int prevSrc = src;
     while(prevSrc != dst){
-    for(int i = 0; i < speeds[prevSrc].length; i++){
-      int speed1 = speeds[prevSrc][i];
-      //which speed in each list is fastest/
-      if(speed1 > maxSpeed){
-        
-      }
-      prevSrc = adjlist[prevSrc][i];
-      }
-     }
-     if(src == dst){return -1;}
-     return maxSpeed;
+      for(int i = 0; i < speeds[prevSrc].length; i++){
+        int speed1 = speeds[prevSrc][i];
+        //which speed in each list is fastest/
+        if(speed1 > maxSpeed){
+          
+        }
+        prevSrc = adjlist[prevSrc][i];
+        }
+    }
+    if(src == dst){return -1;}
+    return maxSpeed;
 
-     //psuedo codeish
-     q = queue();
-      int[] parent = int[adjList.length];
-     while(!q.isEmpty()){
+    //psuedo codeish
+    q = queue();
+    int[] parent = int[adjList.length];
+    while(!q.isEmpty()){
       current = q.poll()
       for(each edge)
         if(parent[edges] = null and edge != src){
           parent[edge] = edge;
           push edge
         }
-         second half lszkhg;kergvb;zbhv
-     }
-
-
+          second half lszkhg;kergvb;zbhv
+    }
+    */
+  }
 
   /**
    * Inner-class that allows for the priority queue to store
