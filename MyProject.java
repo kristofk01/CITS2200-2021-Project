@@ -9,7 +9,6 @@ public class MyProject implements Project {
    * @param adjlist the adjacency list of the graph being checked.
    */
   public boolean allDevicesConnected(int[][] adjlist) {
-
     // Linear time implementation
     // https://courses.cs.vt.edu/~cs4104/murali/Fall09/lectures/lecture-06-linear-time-graph-algorithms.pdf
 
@@ -24,20 +23,6 @@ public class MyProject implements Project {
       int current = queue.remove();
       for (int vertex : adjlist[current]) {
         if (!visited[vertex]) {
-          queue.add(vertex);
-          visited[vertex] = true;
-        }
-      }
-    }
-    
-    //from last node in other direction (incase 2 cycles?)
-    // NOTE(Kris): not 100% sure what u mean, but this causes an infinite loop
-    //queue.add(adjlist.length -1);
-
-    while (!queue.isEmpty()) {
-      int current = queue.remove();
-      for (int vertex : adjlist[current]) {
-        if (visited[vertex]) {
           queue.add(vertex);
           visited[vertex] = true;
         }
@@ -98,46 +83,73 @@ public class MyProject implements Project {
      *i think the queries arrays will not be the same length as addrs so that will need to be checked. 
      *returning the number of hops to get to a subnet (from queries)
      */
-
-    
-    // This stack should contain all devices in the specified subnet
-    //Stack<Integer> stack = new Stack<>();
     
     int deviceCount = adjlist.length;
-
-    ///////////////////
-    // Might not need a stack, we just set the devices that aren't in the
-    // subnet to visited=true so that Dijkstra ignores them from the start.
     boolean[] visited = new boolean[deviceCount];
-    ///////////////////
-    
-    // NOTE: probably broken asf
-    for (int i = 0; i < deviceCount; i++) {
-      //int device = adjlist[i][0];
-      short[] device_address = addrs[i];
+    int[] hopsByQuery = new int[queries.length];
+    Arrays.fill(hopsByQuery, Integer.MAX_VALUE);
 
-      // The device is in the subnet
-      boolean isInSubnet = true;
-      for (int j = 0; j < queries[i].length; j++) {
-        short[] subnet = queries[i];
-        // Not in subnet
-        if (subnet[j] < device_address[j]) {
-          isInSubnet = false;
-          break;
+    for (int i = 0; i < queries.length; i++) {
+      short[] subnet = queries[i];
+
+      for (int j = 0; j < deviceCount; j++) {
+        short[] device_address = addrs[j];
+
+        for (int k = 0; k < subnet.length; k++) {
+          if (subnet[k] != device_address[k]) {
+            visited[j] = true;
+          }
         }
       }
-      if (!isInSubnet) {
-        visited[i] = true;
-      } // else { stack.push(device); }
+      
+      // contains the indices of all the devices in the subnet
+      // for the current query. -1 if not in the subnet.
+      // TODO: maybe use BitSet instead of an array??
+      int[] destinations = new int[deviceCount];
+      Arrays.fill(destinations, -1);
+      for (int j = 0; j < deviceCount; j++)
+        if (!visited[j])
+          destinations[j] = j;
+      
+      /*
+      System.out.println();
+      for (int d : destinations)
+        System.out.print(d + ", ");
+      System.out.println();
+      */
+
+      Arrays.fill(visited, false);
+      
+      int[] distances = SSSP(adjlist, src);
+      
+      System.out.print("Distances: \t");
+      for (int d : distances) {
+        System.out.print(d + ", ");
+      }
+      System.out.println();
+      
+      try {
+        hopsByQuery[i] = distances[i];
+      } catch (Exception e) {
+        //System.out.println("xxx");
+        continue;
+      }
+      /*
+      */
     }
-    
-    //key returns null :/
 
-    // Run Dijkstra's on the devices in the subnet
+    return hopsByQuery;
+  }
+
+  // TODO: fix
+  private int[] SSSP (int[][] adjlist, int src) {
     PriorityQueue<Node> queue = new PriorityQueue<>();
-    int[] key = new int[deviceCount];
-    Arrays.fill(key, -1);
-
+    int vertexCount = adjlist.length;
+    
+    boolean[] visited = new boolean[vertexCount];
+    int[] key = new int[vertexCount];
+    Arrays.fill(key, Integer.MAX_VALUE);
+    
     key[src] = 0;
     queue.add(new Node(src, key[src]));
 
@@ -147,11 +159,10 @@ public class MyProject implements Project {
         visited[current.vertex] = true;
         key[current.vertex] = current.priority;
 
-        // deviceCount is wrong, java.lang.ArrayIndexOutOfBoundsException for i
-        for (int i = 0; i < deviceCount; i++) {
-          if (!visited[i] && adjlist[current.vertex][i] >= 1) {
-            queue.remove();
-            queue.add(new Node(i, adjlist[current.vertex][i] + current.priority));
+        // For every unvisited neighbouring vertex to "current"
+        for (int i = 0; i < adjlist[current.vertex].length; i++) {
+          if (!visited[i]) {
+            queue.add(new Node(i, 1 + current.priority));
           }
         }
       }
