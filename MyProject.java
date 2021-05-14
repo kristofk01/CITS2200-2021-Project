@@ -47,7 +47,7 @@ public class MyProject implements Project {
   public int numPaths(int[][] adjlist, int src, int dst) {
     // This might be helpful for when we want to make it faster:
     // https://www.cs.princeton.edu/~rs/talks/PathsInGraphs07.pdf
-    if (src == dst) { return 1; }
+    if (src == dst) return 1;
 
     Queue<Integer> queue = new LinkedList<>();
     boolean[] visited = new boolean[adjlist.length];
@@ -74,81 +74,79 @@ public class MyProject implements Project {
 
   public int[] closestInSubnet(int[][] adjlist, short[][] addrs, int src, short[][] queries) {
     //Dijkstra's algorithm with binary heap has the complexity we need (wikipedia lmao)
-    /*
-     *addrs[i][] = an ip adress of 4 vals from 1-255 for device i
-     *queries[i][] = ip address prefix? eg for {198, 34, 1, 1} it would be {198, 34} but not {198, 34, 2}
-     *probably going to want to take the address from the source and go to eaach node 1 index at a time
-     *eg) 
-     *get.addrs[src]. for each query, is queries[i][0] = addrs[src][0] if so move on to queries[i][1] etc
-     *i think the queries arrays will not be the same length as addrs so that will need to be checked. 
-     *returning the number of hops to get to a subnet (from queries)
-     */
-    
     int deviceCount = adjlist.length;
-    boolean[] visited = new boolean[deviceCount];
     int[] hopsByQuery = new int[queries.length];
     Arrays.fill(hopsByQuery, Integer.MAX_VALUE);
 
+    // Run Dijkstra's on the graph
+    int[] distances = SSSP(adjlist, src);
+    
+    ///// TODO: REMOVE /////
+    System.out.print("Distances: \t");
+    for (int i = 0; i < distances.length; i++)
+      System.out.print(distances[i] + ", ");
+    System.out.println();
+    ////////////////////////
+    
+    // A dictionary with each element containing (<device_index>, <distance>)
+    Hashtable<Integer, Integer> deviceInfo = new Hashtable<>();
+    for (int j = 0; j < deviceCount; j++)
+      deviceInfo.put(j, distances[j]);
+    
+    ///// TODO: REMOVE /////
+    Set<Integer> set = deviceInfo.keySet();
+    for (int key : set) {
+      System.out.println("device: " + key + ",\tdistance: " + deviceInfo.get(key));
+    }
+    ////////////////////////
+
     for (int i = 0; i < queries.length; i++) {
       short[] subnet = queries[i];
+      // Number of devices in the current subnet
+      int numberOfDestinations = 0;
+
+      // 0 if in the device is in the subnet, 1 o/w.
+      BitSet destinations = new BitSet(deviceCount);
 
       for (int j = 0; j < deviceCount; j++) {
         short[] device_address = addrs[j];
 
         for (int k = 0; k < subnet.length; k++) {
+          // If not in the subnet
           if (subnet[k] != device_address[k]) {
-            visited[j] = true;
+            // NOTE: we could remove the device from the hashtable but then
+            //       we'd have to re-compute the distances for the next query
+            //       which would be much slower...
+            destinations.set(j);
           }
         }
       }
-      
-      // contains the indices of all the devices in the subnet
-      // for the current query. -1 if not in the subnet.
-      // TODO: maybe use BitSet instead of an array??
-      int[] destinations = new int[deviceCount];
-      Arrays.fill(destinations, -1);
-      for (int j = 0; j < deviceCount; j++)
-        if (!visited[j])
-          destinations[j] = j;
-      
-      /*
-      System.out.println();
-      for (int d : destinations)
-        System.out.print(d + ", ");
-      System.out.println();
-      */
 
-      Arrays.fill(visited, false);
-      
-      int[] distances = SSSP(adjlist, src);
-      
-      System.out.print("Distances: \t");
-      for (int d : distances) {
-        System.out.print(d + ", ");
+      for (int j = 0; j < deviceCount; j++) {
+        if (!destinations.get(j)) {
+          hopsByQuery[i] = distances[j];
+          numberOfDestinations++;
+        }
+
+        if (numberOfDestinations > 1) {
+          // Get the minimum distance between the src and the other devices...
+          // TODO: fix...
+          Collection<Integer> T = deviceInfo.values();
+          hopsByQuery[i] = Collections.min(T);;
+        }
       }
-      System.out.println();
-      
-      try {
-        hopsByQuery[i] = distances[i];
-      } catch (Exception e) {
-        //System.out.println("xxx");
-        continue;
-      }
-      /*
-      */
     }
 
     return hopsByQuery;
   }
 
-  // TODO: fix
   private int[] SSSP (int[][] adjlist, int src) {
     PriorityQueue<Node> queue = new PriorityQueue<>();
-    int vertexCount = adjlist.length;
     
+    int vertexCount = adjlist.length;
     boolean[] visited = new boolean[vertexCount];
     int[] key = new int[vertexCount];
-    Arrays.fill(key, Integer.MAX_VALUE);
+    Arrays.fill(key, -1);
     
     key[src] = 0;
     queue.add(new Node(src, key[src]));
@@ -159,10 +157,10 @@ public class MyProject implements Project {
         visited[current.vertex] = true;
         key[current.vertex] = current.priority;
 
-        // For every unvisited neighbouring vertex to "current"
-        for (int i = 0; i < adjlist[current.vertex].length; i++) {
-          if (!visited[i]) {
-            queue.add(new Node(i, 1 + current.priority));
+        // For every unvisited neighbouring vertex ``v`` to ``current``
+        for (int v : adjlist[current.vertex]) {
+          if (!visited[v]) {
+            queue.add(new Node(v, 1 + current.priority));
           }
         }
       }
@@ -170,7 +168,6 @@ public class MyProject implements Project {
 
     return key;
   }
-
   
   public int maxDownloadSpeed(int[][] adjlist, int[][] speeds, int src, int dst) {
    //Bellman Ford or Floyd Warshall depending on the complexity (VE vs V^3)
@@ -185,9 +182,65 @@ public class MyProject implements Project {
       //https://en.wikipedia.org/wiki/Edmonds%E2%80%93Karp_algorithm
 
     // make speeds array and just return distance at dst?
-    return 0;
-    /*
+    
+    if (src == dst) return -1;
+
+    int deviceCount = adjlist.length;
+    int[][] flow = new int[deviceCount][deviceCount];
+    boolean reachedDestination = false;
+
+    while (!reachedDestination) {
+      Queue<Integer> queue = new LinkedList<>();
+      int[] parent = new int[deviceCount];
+      boolean[] visited = new boolean[deviceCount];
+      
+      queue.add(src);
+      visited[src] = true;
+
+      while (!queue.isEmpty()) {
+        int current = queue.remove();
+        if (current == dst) {
+          reachedDestination = true;
+          break;
+        }
+
+        for (int i = 0; i < deviceCount; i++) {
+          // WARNING: THIS IS SO DUMB I CANT EVEN
+          // TODO: get rid of try-catch blocks
+          try {
+            if (!visited[i] && speeds[current][i] > flow[current][i]) {
+              queue.add(i);
+              visited[i] = true;
+              parent[i] = current;
+            }
+          } catch (Exception e) {}
+        }
+      }
+
+      // Terminate - we have not reached the destination
+      if (!reachedDestination) break;
+
+      // Reached destination
+      try {
+        int temp = speeds[parent[dst]][dst] - flow[parent[dst]][dst];
+        for (int i = dst; i != src; i = parent[i]) {
+          temp = Math.min(temp, (speeds[parent[i]][i] - flow[parent[i]][i]));
+        }
+        
+        for (int i = dst; i != src; i = parent[i]) {
+          flow[parent[i]][i] += temp;
+          flow[i][parent[i]] -= temp;
+        }
+      } catch (Exception e) {}
+    }
+
     int maxSpeed = 0;
+    for (int i = 0; i < deviceCount; i++) {
+      maxSpeed += flow[src][i];
+    }
+    return maxSpeed;
+    
+    /*
     int prevSrc = src;
     while(prevSrc != dst){
       for(int i = 0; i < speeds[prevSrc].length; i++){
