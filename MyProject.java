@@ -3,11 +3,59 @@
 import java.util.*;
 
 public class MyProject implements Project {
+
+  // As per project spec
+  public MyProject () {}
+
   /**
    * Checks whether all of the devices in the network are connected using BFS.
    * 
    * @param adjlist the adjacency list of the graph being checked.
    */
+  public boolean allDevicesConnected(int[][] adjlist) {
+    /* Union-find algo is the way to do it
+    * https://labuladong.gitbook.io/algo-en/iv.-high-frequency-interview-problem/union-find-explanation
+    * https://www.cs.princeton.edu/~rs/AlgsDS07/01UnionFind.pdf
+    * https://cse.taylor.edu/~jdenning/classes/cos265/slides/01_UnionFind.html
+    */
+    
+    int numberOfDevices = adjlist.length;
+    int[] parent = new int[numberOfDevices];
+
+    // parent of each device is itself initially...
+    for (int i = 0; i < numberOfDevices; i++)
+      parent[i] = i;
+
+    boolean[] connected = new boolean[numberOfDevices];
+    for (int i = 0; i < numberOfDevices; i += 2) {
+      if (numberOfDevices % 2 == 1 && i == numberOfDevices-1) {
+        System.out.println(i);
+        int rootV = find(i, parent);
+        // any arbirary device, since we've looked at all of them but one at this point
+        int rootU = find(0, parent);
+        connected[i] = rootV == rootU;
+      }
+      else {
+        int rootV = find(i, parent);
+        int rootU = find(i+1, parent);
+        connected[i] = rootV == rootU;
+        connected[i+1] = connected[i];
+      }
+    }
+
+    for (boolean v : connected)
+      if (!v) return false;
+    
+    return true;
+  }
+
+  private int find (int v, int[] parent) {
+    while (parent[v] != v)
+      v = parent[v];
+    return v;
+  }
+
+  /*
   public boolean allDevicesConnected(int[][] adjlist) {
     // Linear time implementation
     // https://courses.cs.vt.edu/~cs4104/murali/Fall09/lectures/lecture-06-linear-time-graph-algorithms.pdf
@@ -34,6 +82,7 @@ public class MyProject implements Project {
 
     return true;
   }
+  */
 
   /**
    * Computes (using BFS) all possible paths between two vertices in the graph.
