@@ -3,63 +3,18 @@
 import java.util.*;
 
 public class MyProject implements Project {
-
   // As per project spec
   public MyProject () {}
 
   /**
    * Checks whether all of the devices in the network are connected using BFS.
+   * Complexity: O(N).
    * 
-   * @param adjlist the adjacency list of the graph being checked.
+   * @param adjlist c
+   * 
+   * @return whether or not all of the devices are connected in the network
    */
   public boolean allDevicesConnected(int[][] adjlist) {
-    /* Union-find algo is the way to do it
-    * https://labuladong.gitbook.io/algo-en/iv.-high-frequency-interview-problem/union-find-explanation
-    * https://www.cs.princeton.edu/~rs/AlgsDS07/01UnionFind.pdf
-    * https://cse.taylor.edu/~jdenning/classes/cos265/slides/01_UnionFind.html
-    */
-    
-    int numberOfDevices = adjlist.length;
-    int[] parent = new int[numberOfDevices];
-
-    // parent of each device is itself initially...
-    for (int i = 0; i < numberOfDevices; i++)
-      parent[i] = i;
-
-    boolean[] connected = new boolean[numberOfDevices];
-    for (int i = 0; i < numberOfDevices; i += 2) {
-      if (numberOfDevices % 2 == 1 && i == numberOfDevices-1) {
-        System.out.println(i);
-        int rootV = find(i, parent);
-        // any arbirary device, since we've looked at all of them but one at this point
-        int rootU = find(0, parent);
-        connected[i] = rootV == rootU;
-      }
-      else {
-        int rootV = find(i, parent);
-        int rootU = find(i+1, parent);
-        connected[i] = rootV == rootU;
-        connected[i+1] = connected[i];
-      }
-    }
-
-    for (boolean v : connected)
-      if (!v) return false;
-    
-    return true;
-  }
-
-  private int find (int v, int[] parent) {
-    while (parent[v] != v)
-      v = parent[v];
-    return v;
-  }
-
-  /*
-  public boolean allDevicesConnected(int[][] adjlist) {
-    // Linear time implementation
-    // https://courses.cs.vt.edu/~cs4104/murali/Fall09/lectures/lecture-06-linear-time-graph-algorithms.pdf
-
     Queue<Integer> queue = new LinkedList<>();
     boolean[] visited = new boolean[adjlist.length];
 
@@ -86,6 +41,7 @@ public class MyProject implements Project {
 
   /**
    * Computes (using BFS) all possible paths between two vertices in the graph.
+   * Complexity: O(N).
    * 
    * @param adjlist the adjacency list of the graph
    * @param src the source vertex
@@ -94,8 +50,6 @@ public class MyProject implements Project {
    * @return the number of paths
    */
   public int numPaths(int[][] adjlist, int src, int dst) {
-    // This might be helpful for when we want to make it faster:
-    // https://www.cs.princeton.edu/~rs/talks/PathsInGraphs07.pdf
     if (src == dst) return 1;
 
     Queue<Integer> queue = new LinkedList<>();
@@ -121,67 +75,58 @@ public class MyProject implements Project {
     return count;
   }
 
+  /**
+   * Computes the minimum number of hops required to reach a device in each subnet query.
+   * 
+   * @param adjlist The adjacency list describing the links between devices
+   * @param addrs The list of IP addresses for each device
+   * @param src The source device
+   * @param queries The queries to respond to for each subnet
+   * 
+   * @return An array with the distance to the closest device for each query, or Integer.MAX_VALUE if none are reachable
+   */
   public int[] closestInSubnet(int[][] adjlist, short[][] addrs, int src, short[][] queries) {
-    //Dijkstra's algorithm with binary heap has the complexity we need (wikipedia lmao)
     int deviceCount = adjlist.length;
     int[] hopsByQuery = new int[queries.length];
     Arrays.fill(hopsByQuery, Integer.MAX_VALUE);
 
-    // Run Dijkstra's on the graph
+    // Run Dijkstra's on the graph to get the distances from the source to all nodes
     int[] distances = SSSP(adjlist, src);
     
-    ///// TODO: REMOVE /////
-    System.out.print("Distances: \t");
-    for (int i = 0; i < distances.length; i++)
-      System.out.print(distances[i] + ", ");
-    System.out.println();
-    ////////////////////////
-    
-    // A dictionary with each element containing (<device_index>, <distance>)
-    Hashtable<Integer, Integer> deviceInfo = new Hashtable<>();
-    for (int j = 0; j < deviceCount; j++)
-      deviceInfo.put(j, distances[j]);
-    
-    ///// TODO: REMOVE /////
-    Set<Integer> set = deviceInfo.keySet();
-    for (int key : set) {
-      System.out.println("device: " + key + ",\tdistance: " + deviceInfo.get(key));
-    }
-    ////////////////////////
-
     for (int i = 0; i < queries.length; i++) {
       short[] subnet = queries[i];
       // Number of devices in the current subnet
       int numberOfDestinations = 0;
+ 
+      // Contains all the nodes in the subnet with priority = distance
+      // from the source.
+      PriorityQueue<Node> deviceInfo = new PriorityQueue<>();
 
-      // 0 if in the device is in the subnet, 1 o/w.
-      BitSet destinations = new BitSet(deviceCount);
+      // 1 if the device is in the subnet, 0 o/w.
+      BitSet notInSubnet = new BitSet(deviceCount);
 
       for (int j = 0; j < deviceCount; j++) {
         short[] device_address = addrs[j];
-
         for (int k = 0; k < subnet.length; k++) {
           // If not in the subnet
           if (subnet[k] != device_address[k]) {
-            // NOTE: we could remove the device from the hashtable but then
-            //       we'd have to re-compute the distances for the next query
-            //       which would be much slower...
-            destinations.set(j);
+            notInSubnet.set(j);
           }
         }
       }
 
       for (int j = 0; j < deviceCount; j++) {
-        if (!destinations.get(j)) {
+        // If device j is in the subnet
+        if (!notInSubnet.get(j)) {
           hopsByQuery[i] = distances[j];
+          deviceInfo.add(new Node(j, distances[j]));
           numberOfDestinations++;
         }
 
         if (numberOfDestinations > 1) {
           // Get the minimum distance between the src and the other devices...
-          // TODO: fix...
-          Collection<Integer> T = deviceInfo.values();
-          hopsByQuery[i] = Collections.min(T);;
+          // i.e. the root node in the priority queue.
+          hopsByQuery[i] = deviceInfo.peek().priority;
         }
       }
     }
@@ -189,6 +134,13 @@ public class MyProject implements Project {
     return hopsByQuery;
   }
 
+  /**
+   * Runs Dijkstra's single source shortest path algorithm on the given graph.
+   * 
+   * @param adjlist the adjacency list of the graph
+   * @param src the node to start the search from
+   * @return distances from the source to all other nodes
+   */
   private int[] SSSP (int[][] adjlist, int src) {
     PriorityQueue<Node> queue = new PriorityQueue<>();
     
