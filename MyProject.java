@@ -37,6 +37,7 @@ public class MyProject implements Project {
 
     return true;
   }
+  */
 
   /**
    * Computes (using BFS) all possible paths between two vertices in the graph.
