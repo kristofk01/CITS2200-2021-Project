@@ -10,7 +10,7 @@ public class MyProject implements Project {
    * Checks whether all of the devices in the network are connected using BFS.
    * Complexity: O(N).
    * 
-   * @param adjlist c
+   * @param adjlist the adjacency list of the graph
    * 
    * @return whether or not all of the devices are connected in the network
    */
@@ -24,66 +24,22 @@ public class MyProject implements Project {
 
     while (!queue.isEmpty()) {
       int current = queue.remove();
+      visited[current] = true;
+
       for (int vertex : adjlist[current]) {
-        if (!visited[vertex]) {
+        if (vertex != current && !visited[vertex] && !queue.contains(vertex)) {
           queue.add(vertex);
           visited[vertex] = true;
         }
       }
     }
-   for(int v : visited) {
-     if(!visited[v]) return false;
-   }
 
-   int[][] transposed = transpose(adjlist); //if any node connected to 0, the whole graph is connected
-   boolean[] visited0 = new boolean[transposed.length];   
-
-   queue.add(0);
-   visited0[0] = true;
-
-    while (!queue.isEmpty()) {
-      int current = queue.remove();
-      for (int vertex : transposed[current]) {
-        if (!visited0[vertex]) {
-          queue.add(vertex);
-          visited0[vertex] = true;
-        }
-      }
+    for(boolean v : visited) {
+      if(!v) return false;
     }
-
-
-     for (int v : visited0)
-      if (!visited0[v]) return false;
 
     return true;
   }
-  
-  
-
-
- private int[][] transpose(int[][] adjlist){
-   ArrayList<Integer>[] reversed = new ArrayList[adjlist.length];
-   for(int j = 0; j < reversed.length; j++){
-     reversed[j]  = new ArrayList<>(); 
-       }
-       for(int u = 0; u < adjlist.length; u++){
-        for(int v = 0; v < adjlist[u].length; v++)
-          reversed[adjlist[u][v]].add(u);
-       }
-       
-       int[][] complete = new int[adjlist.length][5];
-       //NEEDS FIXING: HAS ERROR TRYING  TO CONVERT
-       for (int h = 0; h < adjlist.length; h++){
-        complete[h] = reversed[h].toArray(new Integer[1]);// convert each arraylist to array
-       }
-
-       return complete;
-     }
-
-
-    
-
-
 
   /**
    * Computes (using BFS) all possible paths between two vertices in the graph.
@@ -99,30 +55,49 @@ public class MyProject implements Project {
     if (src == dst) return 1;
 
     Queue<Integer> queue = new LinkedList<>();
-    boolean[] visited = new boolean[adjlist.length];
-    int count = 0;
+    int deviceCount = adjlist.length;
+    boolean[] visited = new boolean[deviceCount];
+
+    int[] parent = new int[deviceCount];
+    Arrays.fill(parent, -1);
 
     queue.add(src);
     visited[src] = true;
+    parent[src] = src;
 
     while (!queue.isEmpty()) {
       int current = queue.remove();
+      visited[current] = true;
+
       for (int vertex : adjlist[current]) {
-        if (vertex == dst) {
-          count++;
-        }
-        else if (!visited[vertex]) {
+        if (vertex != current && !visited[vertex] && !queue.contains(vertex)) {
+          parent[vertex] = current;
           queue.add(vertex);
-          visited[vertex] = true;
         }
       }
     }
+
+
+    /*
+     * Kinda stuck here
+     * 
+    System.out.print("\nParents: ");
+    int count = 0;
+    for (int i = 0; i < deviceCount; i++) {
+      System.out.print(parent[i] + ", ");
+      if (parent[i] != -1 && parent[src] == parent[dst]) {
+        count++;
+      }
+    }
+    System.out.println();
+    */
+
+    return count;
+
     //not good complexity -dfs variant and  remove from visited to find every single path then count.
     //this bfs doesnt work bc it forms a spanning tree -> 1 path
     // if we just follow each path out from the source and keep in array and keep following every path (not necessarilly shortest) then count everytime we hit it
     //dont keep track of visited maybe?
-
-    return count;
   }
 
   /**
@@ -220,7 +195,7 @@ public class MyProject implements Project {
     return key;
   }
   
- public int maxDownloadSpeed(int[][] adjlist, int[][] speeds, int src, int dst) {
+  public int maxDownloadSpeed(int[][] adjlist, int[][] speeds, int src, int dst) {
    //Bellman Ford or Floyd Warshall depending on the complexity (VE vs V^3)
     /* speeds[i][j] relates to the device at adjList[i][j]
      * instead of smallest path, we need biggest path eg MAX speed
@@ -240,8 +215,8 @@ public class MyProject implements Project {
 
     int[][] speedsMatrix = new int[deviceCount][deviceCount];
 
-    for(int i = 0; i < adjlist.length; i++){
-      for(int j = 0; j <adjlist[i].length; j++){
+    for(int i = 0; i < adjlist.length; i++) {
+      for(int j = 0; j <adjlist[i].length; j++) {
         int index = adjlist[i][j];
         speedsMatrix[i][index] = speeds[i][j];
       }
@@ -267,40 +242,35 @@ public class MyProject implements Project {
         }
 
         for (int i = 0; i < deviceCount; i++) {
+          if (!visited[i] && speedsMatrix[current][i] > flow[current][i]) {
+            queue.offer(i);
+            visited[i] = true;
+            parent[i] = current;
+          }
 
-            if (!visited[i] && speedsMatrix[current][i] > flow[current][i]) {
-              queue.offer(i);
-              visited[i] = true;
-              parent[i] = current;
-            }
-
-      }
+        }
       }
 
       // Terminate - we have not reached the destination
       if (!reachedDestination) break;
 
       // Reached destination
-
-        int temp = speedsMatrix[parent[dst]][dst] - flow[parent[dst]][dst];
-        for (int i = dst; i != src; i = parent[i]) {
-          temp = Math.min(temp, (speedsMatrix[parent[i]][i] - flow[parent[i]][i]));
-    }
+      int temp = speedsMatrix[parent[dst]][dst] - flow[parent[dst]][dst];
+      for (int i = dst; i != src; i = parent[i]) {
+        temp = Math.min(temp, (speedsMatrix[parent[i]][i] - flow[parent[i]][i]));
+      }
         
-        for (int i = dst; i != src; i = parent[i]) {
-          flow[parent[i]][i] += temp;
-          flow[i][parent[i]] -= temp;
-        }
-
+      for (int i = dst; i != src; i = parent[i]) {
+        flow[parent[i]][i] += temp;
+        flow[i][parent[i]] -= temp;
+      }
     } 
 
     int maxSpeed = 0;
-    for (int i = 0; i < deviceCount; i++) {
+    for (int i = 0; i < deviceCount; i++)
       maxSpeed += flow[src][i];
-    }
-    return maxSpeed;
-    
 
+    return maxSpeed;
   }
 
   /**
