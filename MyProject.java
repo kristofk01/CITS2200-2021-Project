@@ -77,7 +77,6 @@ public class MyProject implements Project {
       }
     }
 
-
     /*
      * Kinda stuck here
      * 
@@ -127,22 +126,22 @@ public class MyProject implements Project {
       // from the source.
       PriorityQueue<Node> deviceInfo = new PriorityQueue<>();
 
-      // 1 if the device is in the subnet, 0 o/w.
-      BitSet notInSubnet = new BitSet(deviceCount);
+      // 0 if the device is in the subnet, 1 o/w.
+      BitSet inSubnet = new BitSet(deviceCount);
 
       for (int j = 0; j < deviceCount; j++) {
         short[] device_address = addrs[j];
         for (int k = 0; k < subnet.length; k++) {
           // If not in the subnet
           if (subnet[k] != device_address[k]) {
-            notInSubnet.set(j);
+            inSubnet.set(j);
           }
         }
       }
 
       for (int j = 0; j < deviceCount; j++) {
         // If device j is in the subnet
-        if (!notInSubnet.get(j)) {
+        if (!inSubnet.get(j)) {
           hopsByQuery[i] = distances[j];
           deviceInfo.add(new Node(j, distances[j]));
           numberOfDestinations++;
