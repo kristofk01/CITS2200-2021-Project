@@ -31,9 +31,11 @@ public class MyProject implements Project {
         }
       }
     }
+   for(int v : visited) {
+     if(!visited[v]) return false;
+   }
 
-
-   int[][] transposed = transpose(adjlist) ;
+   int[][] transposed = transpose(adjlist); //if any node connected to 0, the whole graph is connected
    boolean[] visited0 = new boolean[transposed.length];   
 
    queue.add(0);
@@ -42,16 +44,16 @@ public class MyProject implements Project {
     while (!queue.isEmpty()) {
       int current = queue.remove();
       for (int vertex : transposed[current]) {
-        if (!visited[vertex]) {
+        if (!visited0[vertex]) {
           queue.add(vertex);
-          visited[vertex] = true;
+          visited0[vertex] = true;
         }
       }
     }
 
 
-     for (int v = 0; v < adjlist.length; v++)
-      if (!visited[v] || !visited0[v]) return false;
+     for (int v : visited0)
+      if (!visited0[v]) return false;
 
     return true;
   }
@@ -70,7 +72,7 @@ public class MyProject implements Project {
        }
        
        int[][] complete = new int[adjlist.length][5];
-       
+       //NEEDS FIXING: HAS ERROR TRYING  TO CONVERT
        for (int h = 0; h < adjlist.length; h++){
         complete[h] = reversed[h].toArray(new Integer[1]);// convert each arraylist to array
        }
@@ -237,9 +239,7 @@ public class MyProject implements Project {
     int deviceCount = adjlist.length;
 
     int[][] speedsMatrix = new int[deviceCount][deviceCount];
-    //iterate through adjList
-    //for each int[] get length
-    //iterate through int[] taking adjList and speeds and set to speedsMatrix
+
     for(int i = 0; i < adjlist.length; i++){
       for(int j = 0; j <adjlist[i].length; j++){
         int index = adjlist[i][j];
@@ -267,8 +267,6 @@ public class MyProject implements Project {
         }
 
         for (int i = 0; i < deviceCount; i++) {
-          // WARNING: THIS IS SO DUMB I CANT EVEN
-          // TODO: get rid of try-catch blocks
 
             if (!visited[i] && speedsMatrix[current][i] > flow[current][i]) {
               queue.offer(i);
