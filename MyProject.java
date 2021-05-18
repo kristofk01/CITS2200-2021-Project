@@ -10,7 +10,7 @@ public class MyProject implements Project {
    * Checks whether all of the devices in the network are connected using BFS.
    * Complexity: O(N).
    * 
-   * @param adjlist the adjacency list of the graph
+   * @param adjlist c
    * 
    * @return whether or not all of the devices are connected in the network
    */
@@ -31,11 +31,26 @@ public class MyProject implements Project {
         }
       }
     }
+    transpose(adjList) 
+    //bfs
 
     for (boolean v : visited)
       if (!v) return false;
 
     return true;
+  }
+  
+  // FOR EXAMPLE: transpose adjlsit //please do ont copy
+  private int[][] transpose(int[][] adjlist) {
+    ArrayList<Integer>[] result = new ArrayList<Integer>[adjlist.length];
+    for (int i = 0; i < result.length; i++) {
+      result[i] = new ArrayList<Integer>();
+    }
+    for (int u = 0; i < adjlist.length; u++) {
+      for (int v : adjlist[u]) {
+        result[v].add(u);
+      }
+    }
   }
 
   /**
@@ -70,6 +85,10 @@ public class MyProject implements Project {
         }
       }
     }
+    //not good complexity -dfs variant and  remove from visited to find every single path then count.
+    //this bfs doesnt work bc it forms a spanning tree -> 1 path
+    // if we just follow each path out from the source and keep in array and keep following every path (not necessarilly shortest) then count everytime we hit it
+    //dont keep track of visited maybe?
 
     return count;
   }
@@ -101,22 +120,22 @@ public class MyProject implements Project {
       // from the source.
       PriorityQueue<Node> deviceInfo = new PriorityQueue<>();
 
-      // 0 if the device is in the subnet, 1 o/w.
-      BitSet deviceInSubnet = new BitSet(deviceCount);
+      // 1 if the device is in the subnet, 0 o/w.
+      BitSet notInSubnet = new BitSet(deviceCount);
 
       for (int j = 0; j < deviceCount; j++) {
         short[] device_address = addrs[j];
         for (int k = 0; k < subnet.length; k++) {
           // If not in the subnet
           if (subnet[k] != device_address[k]) {
-            deviceInSubnet.set(j);
+            notInSubnet.set(j);
           }
         }
       }
 
       for (int j = 0; j < deviceCount; j++) {
         // If device j is in the subnet
-        if (!deviceInSubnet.get(j)) {
+        if (!notInSubnet.get(j)) {
           hopsByQuery[i] = distances[j];
           deviceInfo.add(new Node(j, distances[j]));
           numberOfDestinations++;
@@ -184,6 +203,18 @@ public class MyProject implements Project {
     // make speeds array and just return distance at dst?
     
     if (src == dst) return -1;
+    //adjList to adjMatrix
+    int[][] speedsMatrix = new int[deviceCount][deviceCount];
+    //iterate through adjList
+    //for each int[] get length
+    //iterate through int[] taking adjList and speeds and set to speedsMatrix
+    for(int i = 0; i < adjlist.length; i++){
+      for(int j = 0; i <adjlist[i].length; j++){
+        int index = adjlist[i][j];
+        speedsMatrix[i][index] = speeds[i][j];
+      }
+    }
+
 
     int deviceCount = adjlist.length;
     int[][] flow = new int[deviceCount][deviceCount];
@@ -239,35 +270,7 @@ public class MyProject implements Project {
       maxSpeed += flow[src][i];
     }
     return maxSpeed;
-    
-    /*
-    int prevSrc = src;
-    while(prevSrc != dst){
-      for(int i = 0; i < speeds[prevSrc].length; i++){
-        int speed1 = speeds[prevSrc][i];
-        //which speed in each list is fastest/
-        if(speed1 > maxSpeed){
-          
-        }
-        prevSrc = adjlist[prevSrc][i];
-        }
-    }
-    if(src == dst){return -1;}
-    return maxSpeed;
 
-    //psuedo codeish
-    q = queue();
-    int[] parent = int[adjList.length];
-    while(!q.isEmpty()){
-      current = q.poll()
-      for(each edge)
-        if(parent[edges] = null and edge != src){
-          parent[edge] = edge;
-          push edge
-        }
-          second half lszkhg;kergvb;zbhv
-    }
-    */
   }
 
   /**
