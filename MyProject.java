@@ -31,27 +31,57 @@ public class MyProject implements Project {
         }
       }
     }
-    transpose(adjList) 
-    //bfs
 
-    for (boolean v : visited)
-      if (!v) return false;
+
+   int[][] transposed = transpose(adjlist) ;
+   boolean[] visited0 = new boolean[transposed.length];   
+
+   queue.add(0);
+   visited0[0] = true;
+
+    while (!queue.isEmpty()) {
+      int current = queue.remove();
+      for (int vertex : transposed[current]) {
+        if (!visited[vertex]) {
+          queue.add(vertex);
+          visited[vertex] = true;
+        }
+      }
+    }
+
+
+     for (int v = 0; v < adjlist.length; v++)
+      if (!visited[v] || !visited0[v]) return false;
 
     return true;
   }
   
-  // FOR EXAMPLE: transpose adjlsit //please do ont copy
-  private int[][] transpose(int[][] adjlist) {
-    ArrayList<Integer>[] result = new ArrayList<Integer>[adjlist.length];
-    for (int i = 0; i < result.length; i++) {
-      result[i] = new ArrayList<Integer>();
-    }
-    for (int u = 0; i < adjlist.length; u++) {
-      for (int v : adjlist[u]) {
-        result[v].add(u);
-      }
-    }
-  }
+  
+
+
+ private int[][] transpose(int[][] adjlist){
+   ArrayList<Integer>[] reversed = new ArrayList[adjlist.length];
+   for(int j = 0; j < reversed.length; j++){
+     reversed[j]  = new ArrayList<>(); 
+       }
+       for(int u = 0; u < adjlist.length; u++){
+        for(int v = 0; v < adjlist[u].length; v++)
+          reversed[adjlist[u][v]].add(u);
+       }
+       
+       int[][] complete = new int[adjlist.length][5];
+       
+       for (int h = 0; h < adjlist.length; h++){
+        complete[h] = reversed[h].toArray(new Integer[1]);// convert each arraylist to array
+       }
+
+       return complete;
+     }
+
+
+    
+
+
 
   /**
    * Computes (using BFS) all possible paths between two vertices in the graph.
@@ -188,7 +218,7 @@ public class MyProject implements Project {
     return key;
   }
   
-  public int maxDownloadSpeed(int[][] adjlist, int[][] speeds, int src, int dst) {
+ public int maxDownloadSpeed(int[][] adjlist, int[][] speeds, int src, int dst) {
    //Bellman Ford or Floyd Warshall depending on the complexity (VE vs V^3)
     /* speeds[i][j] relates to the device at adjList[i][j]
      * instead of smallest path, we need biggest path eg MAX speed
@@ -203,33 +233,34 @@ public class MyProject implements Project {
     // make speeds array and just return distance at dst?
     
     if (src == dst) return -1;
-    //adjList to adjMatrix
+
+    int deviceCount = adjlist.length;
+
     int[][] speedsMatrix = new int[deviceCount][deviceCount];
     //iterate through adjList
     //for each int[] get length
     //iterate through int[] taking adjList and speeds and set to speedsMatrix
     for(int i = 0; i < adjlist.length; i++){
-      for(int j = 0; i <adjlist[i].length; j++){
+      for(int j = 0; j <adjlist[i].length; j++){
         int index = adjlist[i][j];
         speedsMatrix[i][index] = speeds[i][j];
       }
     }
 
-
-    int deviceCount = adjlist.length;
     int[][] flow = new int[deviceCount][deviceCount];
-    boolean reachedDestination = false;
+    boolean reachedDestination = true;
 
-    while (!reachedDestination) {
+    while (reachedDestination) {
+      reachedDestination = false;
       Queue<Integer> queue = new LinkedList<>();
       int[] parent = new int[deviceCount];
       boolean[] visited = new boolean[deviceCount];
       
-      queue.add(src);
+      queue.offer(src);
       visited[src] = true;
 
       while (!queue.isEmpty()) {
-        int current = queue.remove();
+        int current = queue.poll();
         if (current == dst) {
           reachedDestination = true;
           break;
@@ -238,38 +269,39 @@ public class MyProject implements Project {
         for (int i = 0; i < deviceCount; i++) {
           // WARNING: THIS IS SO DUMB I CANT EVEN
           // TODO: get rid of try-catch blocks
-          try {
-            if (!visited[i] && speeds[current][i] > flow[current][i]) {
-              queue.add(i);
+
+            if (!visited[i] && speedsMatrix[current][i] > flow[current][i]) {
+              queue.offer(i);
               visited[i] = true;
               parent[i] = current;
             }
-          } catch (Exception e) {}
-        }
+
+      }
       }
 
       // Terminate - we have not reached the destination
       if (!reachedDestination) break;
 
       // Reached destination
-      try {
-        int temp = speeds[parent[dst]][dst] - flow[parent[dst]][dst];
+
+        int temp = speedsMatrix[parent[dst]][dst] - flow[parent[dst]][dst];
         for (int i = dst; i != src; i = parent[i]) {
-          temp = Math.min(temp, (speeds[parent[i]][i] - flow[parent[i]][i]));
-        }
+          temp = Math.min(temp, (speedsMatrix[parent[i]][i] - flow[parent[i]][i]));
+    }
         
         for (int i = dst; i != src; i = parent[i]) {
           flow[parent[i]][i] += temp;
           flow[i][parent[i]] -= temp;
         }
-      } catch (Exception e) {}
-    }
+
+    } 
 
     int maxSpeed = 0;
     for (int i = 0; i < deviceCount; i++) {
       maxSpeed += flow[src][i];
     }
     return maxSpeed;
+    
 
   }
 
