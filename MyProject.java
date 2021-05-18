@@ -10,7 +10,7 @@ public class MyProject implements Project {
    * Checks whether all of the devices in the network are connected using BFS.
    * Complexity: O(N).
    * 
-   * @param adjlist c
+   * @param adjlist the adjacency list of the graph
    * 
    * @return whether or not all of the devices are connected in the network
    */
@@ -101,22 +101,22 @@ public class MyProject implements Project {
       // from the source.
       PriorityQueue<Node> deviceInfo = new PriorityQueue<>();
 
-      // 1 if the device is in the subnet, 0 o/w.
-      BitSet notInSubnet = new BitSet(deviceCount);
+      // 0 if the device is in the subnet, 1 o/w.
+      BitSet deviceInSubnet = new BitSet(deviceCount);
 
       for (int j = 0; j < deviceCount; j++) {
         short[] device_address = addrs[j];
         for (int k = 0; k < subnet.length; k++) {
           // If not in the subnet
           if (subnet[k] != device_address[k]) {
-            notInSubnet.set(j);
+            deviceInSubnet.set(j);
           }
         }
       }
 
       for (int j = 0; j < deviceCount; j++) {
         // If device j is in the subnet
-        if (!notInSubnet.get(j)) {
+        if (!deviceInSubnet.get(j)) {
           hopsByQuery[i] = distances[j];
           deviceInfo.add(new Node(j, distances[j]));
           numberOfDestinations++;
