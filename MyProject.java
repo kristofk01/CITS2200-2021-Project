@@ -77,11 +77,11 @@ public class MyProject implements Project {
       }
     }
 
+    int count = 0;
     /*
      * Kinda stuck here
      * 
     System.out.print("\nParents: ");
-    int count = 0;
     for (int i = 0; i < deviceCount; i++) {
       System.out.print(parent[i] + ", ");
       if (parent[i] != -1 && parent[src] == parent[dst]) {
