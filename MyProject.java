@@ -14,9 +14,36 @@ public class MyProject implements Project {
    * 
    * @return whether or not all of the devices are connected in the network
    */
-  public boolean allDevicesConnected(int[][] adjlist) {
+   public boolean allDevicesConnected(int[][] adjlist) {
+    boolean[]visited = bfs(adjlist);
+
+    for(boolean v : visited) {
+      if(!v) return false;
+    }
+
+   int[][] transposed = transpose(adjlist) ; //transpose the array to check if all nodes connect to 0.  
+
+   boolean[] visited0 = bfs(transposed);
+
+
+     for (int v = 0; v < adjlist.length; v++)
+      if (!visited[v]) return false;
+
+    return true;
+  }
+  
+
+ /**
+ *Performs a simple BFS in O(N) time using a LinkedQueue
+ *
+ *@param adjacency list to be searched
+ *
+ *@return a boolean array  of which nodes have been visited
+ */
+
+ private boolean[] bfs(int[][] adjList){
     Queue<Integer> queue = new LinkedList<>();
-    boolean[] visited = new boolean[adjlist.length];
+    boolean[] visited = new boolean[adjList.length];
 
     // An arbitrary starting vertex
     queue.add(0);
@@ -26,19 +53,47 @@ public class MyProject implements Project {
       int current = queue.remove();
       visited[current] = true;
 
-      for (int vertex : adjlist[current]) {
+      for (int vertex : adjList[current]) {
         if (vertex != current && !visited[vertex] && !queue.contains(vertex)) {
           queue.add(vertex);
           visited[vertex] = true;
         }
       }
     }
+   return visited;
+ }
 
-    for(boolean v : visited) {
-      if(!v) return false;
+  
+  /**
+  *Transposes an adjacency list.
+  *
+  *@param the adjacency list to be transposed.
+  *
+  *@return the transposed adjacency list.
+  */
+
+ private int[][] transpose(int[][] adjlist){
+   int vertices = adjlist.length;
+
+   ArrayList<ArrayList<Integer>> reversed = new ArrayList<ArrayList<Integer>>(vertices);
+   for(int j = 0; j < adjlist.length; j++){
+      reversed.add(new ArrayList<Integer>()); 
+       }
+
+  for(int u = 0; u < adjlist.length; u++){
+    for(int v = 0; v < adjlist[u].length; v++)
+      reversed.get(adjlist[u][v]).add(u); 
     }
 
-    return true;
+  int[][] completed = new int [adjlist.length][];
+  for(int f = 0; f < reversed.size(); f++){
+    completed[f] = new int[reversed.get(f).size()];
+  for(int g = 0; g < reversed.get(f).size(); g++){
+    completed[f][g] = reversed.get(f).get(g);
+  }
+  }
+
+      return completed;
   }
 
   /**
