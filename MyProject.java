@@ -14,34 +14,25 @@ public class MyProject implements Project {
    * 
    * @return whether or not all of the devices are connected in the network
    */
-   public boolean allDevicesConnected(int[][] adjlist) {
+  public boolean allDevicesConnected(int[][] adjlist) {
     boolean[]visited = bfs(adjlist);
+    //transpose the array to check if all nodes connect to 0.  
+    boolean[] visited0 = bfs(transpose(adjlist));
 
-    for(boolean v : visited) {
-      if(!v) return false;
-    }
-
-   int[][] transposed = transpose(adjlist) ; //transpose the array to check if all nodes connect to 0.  
-
-   boolean[] visited0 = bfs(transposed);
-
-
-     for (int v = 0; v < adjlist.length; v++)
-      if (!visited[v]) return false;
+    for (int i = 0; i < adjlist.length; i++)
+      if (!visited[i] || !visited0[i])
+        return false;
 
     return true;
   }
-  
 
  /**
- *Performs a simple BFS in O(N) time using a LinkedQueue
- *
- *@param adjacency list to be searched
- *
- *@return a boolean array  of which nodes have been visited
- */
-
- private boolean[] bfs(int[][] adjList){
+  * Performs a simple BFS in O(N) time using a LinkedQueue
+  *
+  * @param adjacency list to be searched
+  * @return a boolean array  of which nodes have been visited
+  */
+  private boolean[] bfs(int[][] adjList){
     Queue<Integer> queue = new LinkedList<>();
     boolean[] visited = new boolean[adjList.length];
 
@@ -60,40 +51,40 @@ public class MyProject implements Project {
         }
       }
     }
-   return visited;
- }
+    return visited;
+  }
 
-  
   /**
   *Transposes an adjacency list.
   *
-  *@param the adjacency list to be transposed.
+  *@param adjlist adjacency list to be transposed.
   *
   *@return the transposed adjacency list.
   */
 
- private int[][] transpose(int[][] adjlist){
-   int vertices = adjlist.length;
+  private int[][] transpose(int[][] adjlist){
+    int vertexCount = adjlist.length;
 
-   ArrayList<ArrayList<Integer>> reversed = new ArrayList<ArrayList<Integer>>(vertices);
-   for(int j = 0; j < adjlist.length; j++){
+    ArrayList<ArrayList<Integer>> reversed = new ArrayList<>();
+    for (int i = 0; i < vertexCount; i++) {
       reversed.add(new ArrayList<Integer>()); 
-       }
-
-  for(int u = 0; u < adjlist.length; u++){
-    for(int v = 0; v < adjlist[u].length; v++)
-      reversed.get(adjlist[u][v]).add(u); 
     }
 
-  int[][] completed = new int [adjlist.length][];
-  for(int f = 0; f < reversed.size(); f++){
-    completed[f] = new int[reversed.get(f).size()];
-  for(int g = 0; g < reversed.get(f).size(); g++){
-    completed[f][g] = reversed.get(f).get(g);
-  }
-  }
+    for (int u = 0; u < vertexCount; u++) {
+      for (int v = 0; v < adjlist[u].length; v++) {
+        reversed.get(adjlist[u][v]).add(u); 
+      }
+    }
 
-      return completed;
+    int[][] result = new int [vertexCount][];
+    for (int u = 0; u < reversed.size(); u++) {
+      result[u] = new int[reversed.get(u).size()];
+      for (int v = 0; v < reversed.get(u).size(); v++) {
+        result[u][v] = reversed.get(u).get(v);
+      }
+    }
+
+    return result;
   }
 
   /**
@@ -249,20 +240,17 @@ public class MyProject implements Project {
     return key;
   }
   
-  public int maxDownloadSpeed(int[][] adjlist, int[][] speeds, int src, int dst) {
-   //Bellman Ford or Floyd Warshall depending on the complexity (VE vs V^3)
-    /* speeds[i][j] relates to the device at adjList[i][j]
-     * instead of smallest path, we need biggest path eg MAX speed
-     * can travel multiple paths at once and can be asymetric down a link -> check both ways?
-     *if (src == dst){return -1}
-     *dijkstra again (or similar) to grab the max total speed from the source to destination.
-     */
-
-      // Edmonds–Karp algorithm is best complexity
-      //https://en.wikipedia.org/wiki/Edmonds%E2%80%93Karp_algorithm
-
-    // make speeds array and just return distance at dst?
-    
+  /**
+   * 
+   * 
+   * @param adjlist
+   * @param speeds
+   * @param src
+   * @param dst
+   * 
+   * @return the maximum speed from source to destination devices
+   */
+  public int maxDownloadSpeed(int[][] adjlist, int[][] speeds, int src, int dst) {    
     if (src == dst) return -1;
 
     int deviceCount = adjlist.length;
@@ -309,14 +297,14 @@ public class MyProject implements Project {
       if (!reachedDestination) break;
 
       // Reached destination
-      int temp = speedsMatrix[parent[dst]][dst] - flow[parent[dst]][dst];
+      int minSpeed = speedsMatrix[parent[dst]][dst] - flow[parent[dst]][dst];
       for (int i = dst; i != src; i = parent[i]) {
-        temp = Math.min(temp, (speedsMatrix[parent[i]][i] - flow[parent[i]][i]));
+        minSpeed = Math.min(minSpeed, (speedsMatrix[parent[i]][i] - flow[parent[i]][i]));
       }
         
       for (int i = dst; i != src; i = parent[i]) {
-        flow[parent[i]][i] += temp;
-        flow[i][parent[i]] -= temp;
+        flow[parent[i]][i] += minSpeed;
+        flow[i][parent[i]] -= minSpeed;
       }
     } 
 
