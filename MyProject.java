@@ -142,9 +142,9 @@ public class MyProject implements Project {
     Arrays.fill(hopsByQuery, Integer.MAX_VALUE);
 
     // Run Dijkstra's on the graph to get the distances from the source to all nodes
-    int[] distances = bfsDistances(adjlist);
+    int[] distances = bfsDistances(adjlist); // O(N)
     
-    for (int i = 0; i < queries.length; i++) {
+    for (int i = 0; i < queries.length; i++) { //O(Q)
       short[] subnet = queries[i];
       // Number of devices in the current subnet
       int numberOfDestinations = 0;
@@ -170,7 +170,7 @@ public class MyProject implements Project {
         // If device j is in the subnet
         if (!notInSubnet.get(j)) {
           hopsByQuery[i] = distances[j];
-          deviceInfo.add(new Node(j, distances[j]));
+          deviceInfo.add(new Node(j, distances[j]));//O(logN)
           numberOfDestinations++;
         }
 
