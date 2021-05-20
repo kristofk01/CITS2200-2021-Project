@@ -3,6 +3,9 @@
 import java.util.*;
 
 public class MyProject implements Project {
+  private int count;
+  private boolean[] visited;
+
   // As per project spec
   public MyProject () {}
 
@@ -95,6 +98,34 @@ public class MyProject implements Project {
    * 
    * @return the number of paths
    */
+
+  public int numPaths(int[][] adjlist, int src, int dst) {
+    visited = new boolean[adjlist.length];
+    count = 0;
+    DFS(adjlist, src, dst);
+    return count;
+  }
+
+  private void DFS(int[][] adjlist, int src, int dst) {
+    if (src == dst) {
+      count++;
+      return;
+    }
+
+    if (visited[src]) return;
+
+    visited[src] = true;
+    for (int i = 0; i < adjlist.length; i++) {
+      if (!visited[i]) {
+        DFS(adjlist, i, dst);
+      }
+    }
+    visited[src] = false;
+
+    return;
+  }
+
+  /*
   public int numPaths(int[][] adjlist, int src, int dst) {
     if (src == dst) return 1;
 
@@ -102,28 +133,62 @@ public class MyProject implements Project {
     int deviceCount = adjlist.length;
     boolean[] visited = new boolean[deviceCount];
 
-    int[] parent = new int[deviceCount];
-    Arrays.fill(parent, -1);
+    //int[] parent = new int[deviceCount];
+    int[][] parent = new int[deviceCount][deviceCount];
+    for (int i = 0; i < parent.length; i++)
+      for (int j = 0; j < parent.length; j++)
+        parent[i][j] = -1;
 
     queue.add(src);
     visited[src] = true;
-    int count = 0;
 
     while (!queue.isEmpty()) {
       int current = queue.remove();
       visited[current] = true;
 
+      int i = 0;
       for (int vertex : adjlist[current]) {
-        if (vertex == dst) {
-          count++;
-        }
-        else if (vertex != current && !visited[vertex] && !queue.contains(vertex)) {
+        if (vertex != current && !visited[vertex] && !queue.contains(vertex)) {
+          if (parent[vertex][0] != -1) {
+            parent[vertex][0] = current;
+          }
+          else {
+            parent[vertex][i] = current;
+            i++;
+          }
           queue.add(vertex);
         }
       }
     }
 
+    int count = 0;
+    for (int i = 0; i < deviceCount; i++) {
+      for (int j = 0; j < deviceCount; j++) {
+        if (parent[i][j] == dst) {
+          count++;
+        }
+      }
+    }
+    /*
+    for (int i = 0; i < parent.length; i++) {
+      if (printPath(parent, i) == dst) {
+        count++;
+      }
+    }
+
     return count;
+  }
+  */
+
+  private int printPath(int parent[], int i)
+  {
+    // Base Case : If j is source
+    if (parent[i] == - 1)
+        return -1;
+  
+    printPath(parent, parent[i]);
+  
+    return i;
   }
 
   /**
