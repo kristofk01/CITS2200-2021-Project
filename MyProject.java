@@ -8,7 +8,6 @@ public class MyProject implements Project {
 
   /**
    * Checks whether all of the devices in the network are connected using BFS.
-   * Complexity: O(N).
    * 
    * @param adjlist the adjacency list of the graph
    * 
@@ -55,11 +54,11 @@ public class MyProject implements Project {
   }
 
   /**
-  *Transposes an adjacency list.
+  * Transposes an adjacency list.
   *
-  *@param adjlist adjacency list to be transposed.
+  * @param adjlist adjacency list to be transposed.
   *
-  *@return the transposed adjacency list.
+  * @return the transposed adjacency list.
   */
 
   private int[][] transpose(int[][] adjlist){
@@ -89,7 +88,6 @@ public class MyProject implements Project {
 
   /**
    * Computes (using BFS) all possible paths between two vertices in the graph.
-   * Complexity: O(N).
    * 
    * @param adjlist the adjacency list of the graph
    * @param src the source vertex
@@ -109,40 +107,23 @@ public class MyProject implements Project {
 
     queue.add(src);
     visited[src] = true;
-    parent[src] = src;
+    int count = 0;
 
     while (!queue.isEmpty()) {
       int current = queue.remove();
       visited[current] = true;
 
       for (int vertex : adjlist[current]) {
-        if (vertex != current && !visited[vertex] && !queue.contains(vertex)) {
-          parent[vertex] = current;
+        if (vertex == dst) {
+          count++;
+        }
+        else if (vertex != current && !visited[vertex] && !queue.contains(vertex)) {
           queue.add(vertex);
         }
       }
     }
 
-    int count = 0;
-    /*
-     * Kinda stuck here
-     * 
-    System.out.print("\nParents: ");
-    for (int i = 0; i < deviceCount; i++) {
-      System.out.print(parent[i] + ", ");
-      if (parent[i] != -1 && parent[src] == parent[dst]) {
-        count++;
-      }
-    }
-    System.out.println();
-    */
-
     return count;
-
-    //not good complexity -dfs variant and  remove from visited to find every single path then count.
-    //this bfs doesnt work bc it forms a spanning tree -> 1 path
-    // if we just follow each path out from the source and keep in array and keep following every path (not necessarilly shortest) then count everytime we hit it
-    //dont keep track of visited maybe?
   }
 
   /**
@@ -241,12 +222,12 @@ public class MyProject implements Project {
   }
   
   /**
+   * Computes the max flow (speed) that can be passed through the source to the destination device.
    * 
-   * 
-   * @param adjlist
-   * @param speeds
-   * @param src
-   * @param dst
+   * @param adjlist the adjacency list of the graph
+   * @param speeds the max speed of each link
+   * @param src the source device
+   * @param dst the destination device
    * 
    * @return the maximum speed from source to destination devices
    */
