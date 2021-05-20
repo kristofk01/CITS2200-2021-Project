@@ -231,13 +231,14 @@ public class MyProject implements Project {
    * 
    * @return the maximum speed from source to destination devices
    */
-  public int maxDownloadSpeed(int[][] adjlist, int[][] speeds, int src, int dst) {    
+  public int maxDownloadSpeed(int[][] adjlist, int[][] speeds, int src, int dst) {
+    // Note: "flow" and "speed" are interchangable...
+
     if (src == dst) return -1;
 
     int deviceCount = adjlist.length;
 
     int[][] speedsMatrix = new int[deviceCount][deviceCount];
-
     for(int i = 0; i < adjlist.length; i++) {
       for(int j = 0; j <adjlist[i].length; j++) {
         int index = adjlist[i][j];
@@ -246,49 +247,55 @@ public class MyProject implements Project {
     }
 
     int[][] flow = new int[deviceCount][deviceCount];
-    boolean reachedDestination = true;
 
-    while (reachedDestination) {
-      reachedDestination = false;
+    boolean canFlow = true;
+    do {
+      canFlow = false;
       Queue<Integer> queue = new LinkedList<>();
       int[] parent = new int[deviceCount];
       boolean[] visited = new boolean[deviceCount];
       
-      queue.offer(src);
+      queue.add(src);
       visited[src] = true;
 
       while (!queue.isEmpty()) {
-        int current = queue.poll();
+        int current = queue.remove();
         if (current == dst) {
-          reachedDestination = true;
-          break;
+          canFlow = true;
         }
 
+        // For every adjacent device, check if has not been visited and
+        // that the current flow rate for this device is less than the
+        // max flow rate.
         for (int i = 0; i < deviceCount; i++) {
           if (!visited[i] && speedsMatrix[current][i] > flow[current][i]) {
-            queue.offer(i);
+            queue.add(i);
             visited[i] = true;
             parent[i] = current;
           }
-
         }
       }
-
-      // Terminate - we have not reached the destination
-      if (!reachedDestination) break;
-
-      // Reached destination
+      
+      // No path to destination
+      if (!canFlow)
+        break;
+      
+      // Find new minimum speed by following the path the BFS took from the source
+      // to the destination.
       int minSpeed = speedsMatrix[parent[dst]][dst] - flow[parent[dst]][dst];
       for (int i = dst; i != src; i = parent[i]) {
         minSpeed = Math.min(minSpeed, (speedsMatrix[parent[i]][i] - flow[parent[i]][i]));
       }
-        
+
+      // Update flow values - following the same path (backtracking).
       for (int i = dst; i != src; i = parent[i]) {
         flow[parent[i]][i] += minSpeed;
         flow[i][parent[i]] -= minSpeed;
       }
-    } 
 
+    } while (canFlow);
+
+    // maxSpeed is the sum of all speeds from source to destination
     int maxSpeed = 0;
     for (int i = 0; i < deviceCount; i++)
       maxSpeed += flow[src][i];
