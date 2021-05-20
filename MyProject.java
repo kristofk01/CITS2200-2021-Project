@@ -136,13 +136,13 @@ public class MyProject implements Project {
    * 
    * @return An array with the distance to the closest device for each query, or Integer.MAX_VALUE if none are reachable
    */
-  public int[] closestInSubnet(int[][] adjlist, short[][] addrs, int src, short[][] queries) {
+   public int[] closestInSubnet(int[][] adjlist, short[][] addrs, int src, short[][] queries) {
     int deviceCount = adjlist.length;
     int[] hopsByQuery = new int[queries.length];
     Arrays.fill(hopsByQuery, Integer.MAX_VALUE);
 
     // Run Dijkstra's on the graph to get the distances from the source to all nodes
-    int[] distances = SSSP(adjlist, src);
+    int[] distances = bfsDistances(adjlist);
     
     for (int i = 0; i < queries.length; i++) {
       short[] subnet = queries[i];
@@ -153,22 +153,22 @@ public class MyProject implements Project {
       // from the source.
       PriorityQueue<Node> deviceInfo = new PriorityQueue<>();
 
-      // 0 if the device is in the subnet, 1 o/w.
-      BitSet inSubnet = new BitSet(deviceCount);
+      // 1 if the device is in the subnet, 0 o/w.
+      BitSet notInSubnet = new BitSet(deviceCount);
 
       for (int j = 0; j < deviceCount; j++) {
         short[] device_address = addrs[j];
         for (int k = 0; k < subnet.length; k++) {
           // If not in the subnet
           if (subnet[k] != device_address[k]) {
-            inSubnet.set(j);
+            notInSubnet.set(j);
           }
         }
       }
 
       for (int j = 0; j < deviceCount; j++) {
         // If device j is in the subnet
-        if (!inSubnet.get(j)) {
+        if (!notInSubnet.get(j)) {
           hopsByQuery[i] = distances[j];
           deviceInfo.add(new Node(j, distances[j]));
           numberOfDestinations++;
@@ -185,41 +185,28 @@ public class MyProject implements Project {
     return hopsByQuery;
   }
 
-  /**
-   * Runs Dijkstra's single source shortest path algorithm on the given graph.
-   * 
-   * @param adjlist the adjacency list of the graph
-   * @param src the node to start the search from
-   * @return distances from the source to all other nodes
-   */
-  private int[] SSSP (int[][] adjlist, int src) {
-    PriorityQueue<Node> queue = new PriorityQueue<>();
-    
-    int vertexCount = adjlist.length;
-    boolean[] visited = new boolean[vertexCount];
-    int[] key = new int[vertexCount];
-    Arrays.fill(key, -1);
-    
-    key[src] = 0;
-    queue.add(new Node(src, key[src]));
+  private int[] bfsDistances(int[][] adjList){ // dijkstra's is for weighted but the graph isn't, thus bfs.
+    Queue<Integer> queue = new LinkedList<>();//still works with given test case.
+    int[] distances = new int[adjList.length];
+    boolean[] visited =  new boolean[adjList.length];
+
+    // An arbitrary starting vertex
+    queue.add(0);
+    distances[0] = 0;
 
     while (!queue.isEmpty()) {
-      Node current = queue.remove();
-      if (!visited[current.vertex]) {
-        visited[current.vertex] = true;
-        key[current.vertex] = current.priority;
+      int current = queue.remove();
+      visited[current] = true;
 
-        // For every unvisited neighbouring vertex ``v`` to ``current``
-        for (int v : adjlist[current.vertex]) {
-          if (!visited[v]) {
-            queue.add(new Node(v, 1 + current.priority));
-          }
+      for (int vertex : adjList[current]) {
+        if (vertex != current && !visited[vertex] && !queue.contains(vertex)) {
+          queue.add(vertex);
+          distances[vertex] = distances[current]+1;
         }
       }
     }
-
-    return key;
-  }
+   return distances;
+ }
   
   /**
    * Computes the max flow (speed) that can be passed through the source to the destination device.
