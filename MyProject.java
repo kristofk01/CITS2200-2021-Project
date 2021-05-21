@@ -149,73 +149,47 @@ public class MyProject implements Project {
    * 
    * @return An array with the distance to the closest device for each query, or Integer.MAX_VALUE if none are reachable
    */
-   public int[] closestInSubnet(int[][] adjlist, short[][] addrs, int src, short[][] queries) {
+public int[] closestInSubnet(int[][] adjlist, short[][] addrs, int src, short[][] queries) {
     int deviceCount = adjlist.length;
     int[] hopsByQuery = new int[queries.length];
     Arrays.fill(hopsByQuery, Integer.MAX_VALUE);
 
-    // Run Dijkstra's on the graph to get the distances from the source to all nodes
-    int[] distances = bfsDistances(adjlist); // O(N)
+    int[] distances = bfsDistances(adjlist,src); //shortest path to each node from the source
     
-    /*
-    HashSet<Integer> queryMap = new HashSet<>();
-    for (short[] query : queries) { // O(Q)
-      queryMap.add(binaryQuery);
-    }
-    */    
+    for (int i = 0; i < queries.length; i++) {//for each query...
+      short[] subnet = queries[i];
+ 
+      int min_distance = Integer.MAX_VALUE;
+
+      for (int j = 0; j < deviceCount; j++) {
+        short[] device_address = addrs[j];
+        boolean not_in_subnet = false; //point not in subnet
+        for (int k = 0; k < subnet.length; k++) {
+          // If not in the subnet
+          if (subnet[k] != device_address[k]) {
+            not_in_subnet = true;
+          }
+        }
+
+        if(!not_in_subnet && distances[j] < min_distance){//if device in subnet and its distance < current min distance
+          min_distance = distances[j];
+
+        }
+      }
+      hopsByQuery[i] = min_distance;
+    }    
     
     return hopsByQuery;
   }
 
-    /*
-    for (int i = 0; i < queries.length; i++) { //O(Q)
-      short[] subnet = queries[i];
-      // Number of devices in the current subnet
-      int numberOfDestinations = 0;
- 
-      // Contains all the nodes in the subnet with priority = distance
-      // from the source.
-      PriorityQueue<Node> deviceInfo = new PriorityQueue<>();
-
-      // 1 if the device is in the subnet, 0 o/w.
-      BitSet notInSubnet = new BitSet(deviceCount);
-
-      for (int j = 0; j < deviceCount; j++) {
-        short[] device_address = addrs[j];
-        for (int k = 0; k < subnet.length; k++) {
-          // If not in the subnet
-          if (subnet[k] != device_address[k]) {
-            notInSubnet.set(j);
-          }
-        }
-      }
-
-      for (int j = 0; j < deviceCount; j++) {
-        // If device j is in the subnet
-        if (!notInSubnet.get(j)) {
-          hopsByQuery[i] = distances[j];
-          deviceInfo.add(new Node(j, distances[j]));//O(logN)
-          numberOfDestinations++;
-        }
-
-        if (numberOfDestinations > 1) {
-          // Get the minimum distance between the src and the other devices...
-          // i.e. the root node in the priority queue.
-          hopsByQuery[i] = deviceInfo.peek().priority;
-        }
-      }
-    }
-    */
-
-
-  private int[] bfsDistances (int[][] adjList) {
+  private int[] bfsDistances(int[][] adjList,int src){
     Queue<Integer> queue = new LinkedList<>();
     int[] distances = new int[adjList.length];
     boolean[] visited =  new boolean[adjList.length];
 
     // An arbitrary starting vertex
-    queue.add(0);
-    distances[0] = 0;
+    queue.add(src);
+    distances[src] = 0;
 
     while (!queue.isEmpty()) {
       int current = queue.remove();
