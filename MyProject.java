@@ -3,9 +3,6 @@
 import java.util.*;
 
 public class MyProject implements Project {
-  private int count;
-  private boolean[] visited;
-
   // As per project spec
   public MyProject () {}
 
@@ -98,97 +95,48 @@ public class MyProject implements Project {
    * 
    * @return the number of paths
    */
-
-  public int numPaths(int[][] adjlist, int src, int dst) {
-    visited = new boolean[adjlist.length];
-    count = 0;
-    DFS(adjlist, src, dst);
-    return count;
-  }
-
-  private void DFS(int[][] adjlist, int src, int dst) {
-    if (src == dst) {
-      count++;
-      return;
-    }
-
-    if (visited[src]) return;
-
-    visited[src] = true;
-    for (int i = 0; i < adjlist.length; i++) {
-      if (!visited[i]) {
-        DFS(adjlist, i, dst);
-      }
-    }
-    visited[src] = false;
-
-    return;
-  }
-
-  /*
   public int numPaths(int[][] adjlist, int src, int dst) {
     if (src == dst) return 1;
 
-    Queue<Integer> queue = new LinkedList<>();
+    Stack<Integer> stack = new Stack<>();
     int deviceCount = adjlist.length;
     boolean[] visited = new boolean[deviceCount];
+    int[] parent = new int[deviceCount];
 
-    //int[] parent = new int[deviceCount];
-    int[][] parent = new int[deviceCount][deviceCount];
-    for (int i = 0; i < parent.length; i++)
-      for (int j = 0; j < parent.length; j++)
-        parent[i][j] = -1;
-
-    queue.add(src);
+    stack.push(src);
     visited[src] = true;
 
-    while (!queue.isEmpty()) {
-      int current = queue.remove();
+    int count = 0;
+    while (!stack.empty()) {
+      int current = stack.pop();
       visited[current] = true;
 
-      int i = 0;
-      for (int vertex : adjlist[current]) {
-        if (vertex != current && !visited[vertex] && !queue.contains(vertex)) {
-          if (parent[vertex][0] != -1) {
-            parent[vertex][0] = current;
-          }
-          else {
-            parent[vertex][i] = current;
-            i++;
-          }
-          queue.add(vertex);
-        }
+      if (parent[current] == dst) {
+        visited[dst] = true;
       }
-    }
+      else {
+        visited[dst] = false;
+      }
 
-    int count = 0;
-    for (int i = 0; i < deviceCount; i++) {
-      for (int j = 0; j < deviceCount; j++) {
-        if (parent[i][j] == dst) {
-          count++;
-        }
-      }
-    }
-    /*
-    for (int i = 0; i < parent.length; i++) {
-      if (printPath(parent, i) == dst) {
+      if (current == dst) {
         count++;
       }
+
+      for (int vertex : adjlist[current]) {
+        /*
+        if (vertex == dst && visited[parent[vertex]]) {
+          System.out.println(current + ", " + vertex + ", " + parent[vertex]);
+          count++;
+        }
+        */
+        if (vertex != current && !visited[vertex] && !stack.contains(vertex)) {
+          parent[vertex] = current;
+          stack.push(vertex);
+        }
+      }
     }
-
+    
     return count;
-  }
-  */
-
-  private int printPath(int parent[], int i)
-  {
-    // Base Case : If j is source
-    if (parent[i] == - 1)
-        return -1;
-  
-    printPath(parent, parent[i]);
-  
-    return i;
   }
 
   /**
@@ -209,6 +157,17 @@ public class MyProject implements Project {
     // Run Dijkstra's on the graph to get the distances from the source to all nodes
     int[] distances = bfsDistances(adjlist); // O(N)
     
+    /*
+    HashSet<Integer> queryMap = new HashSet<>();
+    for (short[] query : queries) { // O(Q)
+      queryMap.add(binaryQuery);
+    }
+    */    
+    
+    return hopsByQuery;
+  }
+
+    /*
     for (int i = 0; i < queries.length; i++) { //O(Q)
       short[] subnet = queries[i];
       // Number of devices in the current subnet
@@ -246,12 +205,11 @@ public class MyProject implements Project {
         }
       }
     }
+    */
 
-    return hopsByQuery;
-  }
 
-  private int[] bfsDistances(int[][] adjList){ // dijkstra's is for weighted but the graph isn't, thus bfs.
-    Queue<Integer> queue = new LinkedList<>();//still works with given test case.
+  private int[] bfsDistances (int[][] adjList) {
+    Queue<Integer> queue = new LinkedList<>();
     int[] distances = new int[adjList.length];
     boolean[] visited =  new boolean[adjList.length];
 
@@ -266,7 +224,7 @@ public class MyProject implements Project {
       for (int vertex : adjList[current]) {
         if (vertex != current && !visited[vertex] && !queue.contains(vertex)) {
           queue.add(vertex);
-          distances[vertex] = distances[current]+1;
+          distances[vertex] = distances[current] + 1;
         }
       }
     }
